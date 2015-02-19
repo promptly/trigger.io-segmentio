@@ -1,8 +1,8 @@
 {
-    "changes": "* Update iOS SDK to 1.8.3", 
-    "description": "Use segment.io to record analytics data from your applications", 
-    "min_platform_version": "v2.1.0", 
-    "namespace": "segmentio", 
-    "platform_version": "v2.2.0", 
-    "version": "2.2"
+	"changes": "* Switch to Segment's Analytics-iOS 1.10.4.\n* Register for push notifications on iOS.",
+	"description": "Use segment.io to record analytics data from your applications",
+	"min_platform_version": "v2.2.8",
+	"namespace": "segmentio",
+	"platform_version": "v2.2.9",
+	"version": "2.2.1"
 }

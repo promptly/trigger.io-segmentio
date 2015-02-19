@@ -1,6 +1,6 @@
 //
 //  Taplytics.h
-//  Taplytics v2.0.10
+//  Taplytics v2.1.36
 //
 //  Copyright (c) 2014 Syrp Inc. All rights reserved.
 //
@@ -9,6 +9,11 @@
 #import "TaplyticsOptions.h"
 
 typedef void(^TLExperimentBlock)(NSDictionary *variables);
+
+typedef void(^TLVariationBlock)(NSString* variationName, NSDictionary *variables);
+
+typedef void(^TLRunningExperimentsAndVariationsBlock)(NSDictionary *experimentsAndVariations);
+
 
 @protocol TaplyticsDelegate <NSObject>
 
@@ -58,7 +63,7 @@ typedef void(^TLExperimentBlock)(NSDictionary *variables);
             - @{@"liveUpdate":@NO} Taplytics will auto-detect an app store build or a development build. But to force production mode use @NO,
                 or @YES to force live update mode for testing.
             - @{@"shakeMenu":@NO} To disable the Taplytics development mode shake menu set @NO, only use if you have your own development shake menu.
-            - @{@"disable":@[TaplyticsOptionTrackLocaiton]} To disable any tracking attributes set a @"disable" key with an array of values to disable from
+            - @{@"disable":@[TaplyticsOptionTrackLocation]} To disable any tracking attributes set a @"disable" key with an array of values to disable from
                 TaplyticsOptions.h
  */
 + (void)startTaplyticsAPIKey:(NSString*)apiKey options:(NSDictionary*)options;
@@ -106,12 +111,56 @@ typedef void(^TLExperimentBlock)(NSDictionary *variables);
 + (void)runCodeExperiment:(NSString*)experimentName withBaseline:(TLExperimentBlock)baselineBlock variations:(NSDictionary*)variationNamesAndBlocks;
 
 /**
+ Use this method when running code experiments in Swift, due to how blocks/closures are handled in Swift 
+ passing blocks/closures in an NSDictioary is not supported well. This method will return to either the baselineBlock
+ or the variationBlock with the variation's name. The blocks are called in the same manner as explained in 
+ runCodeExperiment:withBaseline:variations:
+ 
+ Using this method in Swift:
+ Taplytics.runCodeExperiment("testExperiment",
+    forBaseline: { variables in
+        let myVar0: NSNumber? = variables?["var"] as? NSNumber
+        println("Baseline, variable: \(myVar0)")
+    },
+    forVariation: { variationName, variables in
+        let myVar0: NSNumber? = variables?["var"] as? NSNumber
+        if variationName == "variation1" {
+            println("variation 1, variable: \(myVar0)")
+        }
+        else if variationName == "variation2" {
+            println("variation2, variable: \(myVar0)")
+        }
+    }
+ )
+ 
+ @param experimentName Name of the experiment to run
+ @param baselineBlock Baseline block called if experiment is in baseline variation
+ @param variationBlock Variation block called when the experiment is running a variation
+ */
++ (void)runCodeExperiment:(NSString*)experimentName forBaseline:(TLExperimentBlock)baselineBlock forVariation:(TLVariationBlock)variationBlock;
+
+/**
+ Get a NSDictionary of all running experiments and their current variation. This block will return async once the experiment
+ configuration has loaded from our servers, or synchronously if the configuration has already loaded. Example of a NSDictionary that is returned:
+ 
+ NSDictionary* experimentsAndVariations = @{
+    @"Experiment 1": @"baseline",
+    @"Experiment 2": @"Variation 1"
+ };
+ 
+ @param block This block will be called back with a NSDictionary with key value of experiment name and value of it's variation name.
+ */
+
++ (void)getRunningExperimentsAndVariations:(TLRunningExperimentsAndVariationsBlock)block;
+
+/**
  Settings User Attributes allows for submitting mutiple user attributes with custom values. 
  This allows you to set attributes such as a user_id, email, name, age, gender, ect. You can also set a dictionary
  of custom data for the user. The avaliable key-values are shown below:
  
     [Taplytics setUserAttributes:@{
         @"user_id": @"testUser",
+        @"name": @"Test User",
         @"email": @"test@taplytics.com",
         @"gender": @"female",
         @"age": @25,
@@ -127,6 +176,11 @@ typedef void(^TLExperimentBlock)(NSDictionary *variables);
  @warning Attributes can only be values allowed by NSJSONSerialization.
 */
 + (void)setUserAttributes:(NSDictionary*)attributes;
+
+/**
+ Register for push notification access, this method will show the iOS alert asking for access to send push notificaitons.
+ */
++ (void)registerPushNotifications;
 
 /**
  Log an event to Taplytics, these events can be used as goals in your experiments.

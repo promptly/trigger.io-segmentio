@@ -8,8 +8,11 @@
     { "do": { "add_ios_system_framework": "UIKit.framework" } },
     { "do": { "add_ios_system_framework": "QuartzCore.framework" } },
     { "do": { "add_ios_system_framework": "AdSupport.framework" } },
+    { "do": { "add_ios_system_framework": "iAd.framework" } },
     { "do": { "add_ios_system_framework": "MobileCoreServices.framework" } },
+    { "do": { "add_ios_system_framework": "JavaScriptCore.framework" } },
     { "do": { "add_ios_system_framework": "libsqlite3.dylib" } },
     { "do": { "add_ios_system_framework": "libz.1.1.3.dylib" } },
-    { "do": { "add_ios_system_framework": "libicucore.dylib" } }
+    { "do": { "add_ios_system_framework": "libicucore.dylib" } },
+    { "do": { "add_ios_system_framework": "libc++.dylib" } }
 ]
